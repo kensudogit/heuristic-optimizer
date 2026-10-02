@@ -10,6 +10,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.models import (
     CellIn,
     DepartmentIn,
+    EffectivenessOut,
     FlowIn,
     OptimizeRequest,
     OptimizeResponse,
@@ -104,6 +105,21 @@ def _score_out(score) -> ScoreOut:
     )
 
 
+def _effectiveness_out(quality) -> EffectivenessOut | None:
+    if quality is None:
+        return None
+    return EffectivenessOut(
+        lower_bound=round(quality.lower_bound, 4),
+        estimated_gap=round(quality.estimated_gap, 4),
+        estimated_gap_rate=round(quality.estimated_gap_rate, 2),
+        adjacency_hits=quality.adjacency_hits,
+        adjacency_total=quality.adjacency_total,
+        aligned_proposals=quality.aligned_proposals,
+        proposal_count=quality.proposal_count,
+        utilization=round(quality.utilization, 4),
+    )
+
+
 def _to_response(problem: LayoutProblem, result: SearchResult) -> OptimizeResponse:
     return OptimizeResponse(
         initial_placements=[_placement_out(problem, p) for p in result.initial_placements],
@@ -122,6 +138,8 @@ def _to_response(problem: LayoutProblem, result: SearchResult) -> OptimizeRespon
         note=result.note,
         exact_best=None if result.exact_best is None else round(result.exact_best, 4),
         optimality_gap=None if result.optimality_gap is None else round(result.optimality_gap, 4),
+        effectiveness=_effectiveness_out(result.effectiveness),
+        optimal=result.optimal,
         proposals=[
             ProposalOut(
                 rank=p.rank,
@@ -175,6 +193,8 @@ def sample() -> OptimizeRequest:
         adjacency_weight=problem.adjacency_weight,
         seed=1,
         max_passes=80,
+        exact=True,
+        time_limit_ms=45_000,
     )
 
 
@@ -188,6 +208,7 @@ def optimize_layout(req: OptimizeRequest) -> OptimizeResponse:
             max_passes=req.max_passes,
             time_limit_ms=req.time_limit_ms,
             n_proposals=req.n_proposals,
+            exact=req.exact,
         )
     except OptimizerError as exc:
         raise HTTPException(status_code=400, detail=str(exc)) from exc

@@ -60,6 +60,7 @@ export type OptimizeRequest = {
   seed: number | null;
   max_passes: number;
   time_limit_ms?: number | null;
+  exact: boolean;
 };
 
 export type OptimizeResponse = {
@@ -80,6 +81,19 @@ export type OptimizeResponse = {
   proposals: Proposal[];
   exact_best: number | null;
   optimality_gap: number | null;
+  effectiveness: Effectiveness | null;
+  optimal: boolean;
+};
+
+export type Effectiveness = {
+  lower_bound: number;
+  estimated_gap: number;
+  estimated_gap_rate: number;
+  adjacency_hits: number;
+  adjacency_total: number;
+  aligned_proposals: number;
+  proposal_count: number;
+  utilization: number;
 };
 
 export type PathPoint = {

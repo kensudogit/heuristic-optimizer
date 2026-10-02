@@ -18,6 +18,7 @@ def test_sample_and_optimize() -> None:
     assert sample.status_code == 200
     body = sample.json()
     assert len(body["departments"]) == 7
+    body["exact"] = False
     res = client.post("/optimize", json=body)
     assert res.status_code == 200
     out = res.json()
@@ -32,6 +33,8 @@ def test_sample_and_optimize() -> None:
     assert len(out["proposals"][0]["path"]) == 5
     assert out["exact_best"] is None
     assert out["optimality_gap"] is None
+    assert out["effectiveness"] is not None
+    assert out["effectiveness"]["lower_bound"] <= out["best_score"]["flow_cost"] + 1e-6
 
 
 def test_tiny_optimize_returns_exact_gap() -> None:
@@ -56,9 +59,12 @@ def test_tiny_optimize_returns_exact_gap() -> None:
     )
     assert res.status_code == 200
     out = res.json()
-    assert out["exact_best"] is not None
+    assert out["optimal"] is True
+    assert out["exact_best"] == 11
     assert out["optimality_gap"] == 0
-    assert "ギャップ" in out["note"]
+    assert out["proposals"][0]["label"] == "最適解"
+    assert "厳密最適" in out["note"]
+    assert "分枝限定" in out["algorithm"]
 
 
 def test_optimize_rejects_empty() -> None:

@@ -66,7 +66,8 @@ class OptimizeRequest(BaseModel):
     n_proposals: int = Field(default=3, ge=1, le=8)
     seed: int | None = None
     max_passes: int = Field(default=80, ge=1, le=2000)
-    time_limit_ms: int | None = Field(default=None, ge=1, le=60_000)
+    time_limit_ms: int | None = Field(default=None, ge=1, le=120_000)
+    exact: bool = True
 
 
 class PathPointOut(BaseModel):
@@ -84,6 +85,17 @@ class ProposalOut(BaseModel):
     process_summary: str
     reasons: list[str]
     path: list[PathPointOut]
+
+
+class EffectivenessOut(BaseModel):
+    lower_bound: float
+    estimated_gap: float
+    estimated_gap_rate: float
+    adjacency_hits: int
+    adjacency_total: int
+    aligned_proposals: int
+    proposal_count: int
+    utilization: float
 
 
 class OptimizeResponse(BaseModel):
@@ -104,3 +116,5 @@ class OptimizeResponse(BaseModel):
     proposals: list[ProposalOut]
     exact_best: float | None = None
     optimality_gap: float | None = None
+    effectiveness: EffectivenessOut | None = None
+    optimal: bool = False

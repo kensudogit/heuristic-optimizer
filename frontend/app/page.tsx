@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { FactoryGrid } from "@/components/FactoryGrid";
+import { GuideButton } from "@/components/GuideModal";
 import { fetchSample, optimize } from "@/lib/api";
 import type { Department, Flow, OptimizeRequest, OptimizeResponse, Proposal, Relation } from "@/lib/types";
 
@@ -43,6 +44,8 @@ const FALLBACK: OptimizeRequest = {
   adjacency_weight: 8,
   seed: 1,
   max_passes: 80,
+  exact: true,
+  time_limit_ms: 45000,
 };
 
 export default function HomePage() {
@@ -89,11 +92,18 @@ export default function HomePage() {
 
   return (
     <main>
-      <h1>工場建設レイアウト最適化 PoC</h1>
-      <p className="lead">
-        建設業向けの工場レイアウト組み合わせ探索です。入庫→製造→出庫の流れと、敷地・離隔・隣接の条件を満たす
-        実行可能パターンを複数案出します。返るのはヒューリスティックによる案であり、厳密な最適解ではありません。
-      </p>
+      <div className="app-bar">
+        <span className="app-bar-accent" aria-hidden="true" />
+        <div className="app-bar-text">
+          <p className="app-eyebrow">FACTORY LAYOUT</p>
+          <h1>工場建設レイアウト最適化 PoC</h1>
+          <p className="lead">
+            建設業向けの工場レイアウト組み合わせ探索です。入庫→製造→出庫の流れと、敷地・離隔・隣接の条件を満たす
+            配置を求めます。厳密モードでは分枝限定が最適性を証明した解だけを「最適解」と表示します。
+          </p>
+        </div>
+        <GuideButton />
+      </div>
 
       <section>
         <h2>敷地と探索条件</h2>
@@ -137,6 +147,29 @@ export default function HomePage() {
               onChange={(e) => setReq({ ...req, n_proposals: Math.min(8, Math.max(1, Number(e.target.value) || 3)) })}
             />
           </label>
+          <label>
+            制限時間（秒）
+            <input
+              type="number"
+              min={1}
+              max={120}
+              value={Math.round((req.time_limit_ms ?? 45000) / 1000)}
+              onChange={(e) =>
+                setReq({
+                  ...req,
+                  time_limit_ms: Math.min(120000, Math.max(1000, (Number(e.target.value) || 45) * 1000)),
+                })
+              }
+            />
+          </label>
+          <label className="exact-toggle">
+            <input
+              type="checkbox"
+              checked={req.exact}
+              onChange={(e) => setReq({ ...req, exact: e.target.checked })}
+            />
+            厳密最適
+          </label>
         </div>
         <p className="note">
           工程チェーン: {req.process_chain.join(" → ") || "未設定"}。中央 2×2 は通路。出荷場は南側固定。
@@ -145,6 +178,13 @@ export default function HomePage() {
 
       <section>
         <h2>工程・建屋</h2>
+        <div className="row dept head" aria-hidden="true">
+          <span>工程ID</span>
+          <span>名称</span>
+          <span>役割</span>
+          <span>幅</span>
+          <span>高さ</span>
+        </div>
         {req.departments.map((d, i) => (
           <div className="row dept" key={d.id}>
             <input value={d.id} onChange={(e) => updateDept(i, { id: e.target.value })} aria-label={`工程ID-${i}`} />
@@ -177,6 +217,11 @@ export default function HomePage() {
 
       <section>
         <h2>物流（パレット相当 / 日）</h2>
+        <div className="row flow head" aria-hidden="true">
+          <span>from</span>
+          <span>to</span>
+          <span>量</span>
+        </div>
         {req.flows.map((f, i) => (
           <div className="row flow" key={`${f.from_id}-${f.to_id}-${i}`}>
             <input value={f.from_id} onChange={(e) => updateFlow(i, { from_id: e.target.value })} />
@@ -224,11 +269,20 @@ function Results({
   if (!proposal) return null;
   return (
     <section>
-      <h2>提案レイアウト（{result.proposals.length}案）</h2>
+      <h2>提案レイアウト（{result.proposals.length}案）{result.optimal ? " · 厳密最適" : ""}</h2>
       <p className="note">{result.note}</p>
       {result.exact_best != null ? (
         <p className="note">
           厳密最良 {result.exact_best} / ギャップ {result.optimality_gap ?? 0}
+        </p>
+      ) : null}
+      {result.effectiveness ? (
+        <p className="note">
+          物流下界 {result.effectiveness.lower_bound} / 推定ギャップ {result.effectiveness.estimated_gap}（
+          {result.effectiveness.estimated_gap_rate}%） / 隣接 {result.effectiveness.adjacency_hits}/
+          {result.effectiveness.adjacency_total} / 整列案 {result.effectiveness.aligned_proposals}/
+          {result.effectiveness.proposal_count} / 敷地利用率{" "}
+          {(result.effectiveness.utilization * 100).toFixed(1)}%
         </p>
       ) : null}
       <div className="actions">
@@ -256,6 +310,12 @@ function Results({
           <b>流れ</b>
           <span>{proposal.score.process_aligned ? "整列" : "逆行あり"}</span>
         </article>
+        {result.effectiveness ? (
+          <article>
+            <b>推定ギャップ</b>
+            <span>{result.effectiveness.estimated_gap_rate}%</span>
+          </article>
+        ) : null}
       </div>
       <p>{proposal.process_summary}</p>
       {proposal.reasons.length > 0 ? (

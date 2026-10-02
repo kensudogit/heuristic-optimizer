@@ -16,6 +16,7 @@ from app.services.optimizer import (
     evaluate,
     exact_best_if_tractable,
     explain_proposal,
+    flow_lower_bound,
     greedy_layout,
     optimize,
     process_path,
@@ -50,6 +51,17 @@ def _brute_best(problem: LayoutProblem) -> float:
     return best
 
 
+def test_exact_solver_matches_enumeration_and_proves() -> None:
+    problem = _tiny()
+    result = optimize(problem, seed=1, exact=True, time_limit_ms=5_000, n_proposals=1)
+    exact = _brute_best(problem)
+    assert result.optimal is True
+    assert result.best_score.total == pytest.approx(exact)
+    assert result.exact_best == pytest.approx(exact)
+    assert result.optimality_gap == pytest.approx(0.0)
+    assert result.proposals[0].label == "最適解"
+
+
 def test_tiny_instance_matches_enumeration() -> None:
     problem = _tiny()
     result = optimize(problem, seed=1, max_passes=30)
@@ -59,6 +71,7 @@ def test_tiny_instance_matches_enumeration() -> None:
     assert result.best_score.total <= result.initial_score.total + 1e-12
     assert result.exact_best == pytest.approx(exact)
     assert result.optimality_gap == pytest.approx(0.0)
+    assert flow_lower_bound(problem) <= exact + 1e-12
 
 
 def test_high_flow_pair_is_adjacent_on_tiny_grid() -> None:
@@ -123,11 +136,34 @@ def test_sample_returns_multiple_proposals() -> None:
     assert len(result.proposals[0].path) == 5
     assert result.exact_best is None
     assert result.optimality_gap is None
+    assert result.effectiveness is not None
+    assert result.effectiveness.lower_bound <= result.best_score.flow_cost + 1e-12
+    assert result.effectiveness.proposal_count == len(result.proposals)
+    assert 0 < result.effectiveness.utilization <= 1
 
 
 def test_exact_best_skips_large_buildings() -> None:
     assert exact_best_if_tractable(sample_factory()) is None
     assert exact_best_if_tractable(_tiny()) == pytest.approx(_brute_best(_tiny()))
+
+
+def test_chain_guide_makes_initial_or_best_aligned() -> None:
+    problem = sample_factory()
+    initial = greedy_layout(problem)
+    result = optimize(problem, seed=1, max_passes=25, n_proposals=3)
+    assert result.effectiveness is not None
+    assert result.effectiveness.aligned_proposals >= 1
+    assert result.best_score.process_aligned or evaluate(problem, initial).process_aligned
+
+
+def test_sample_exact_is_proven_optimal() -> None:
+    result = optimize(sample_factory(), seed=1, exact=True, time_limit_ms=45_000, n_proposals=1)
+    assert result.optimal is True
+    assert result.best_score.feasible
+    assert result.best_score.process_aligned
+    assert result.best_score.total == pytest.approx(878.0)
+    assert result.optimality_gap == pytest.approx(0.0)
+    assert result.proposals[0].label == "最適解"
 
 
 def test_explain_and_path_use_process_names() -> None:
