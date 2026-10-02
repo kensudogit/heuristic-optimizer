@@ -112,7 +112,6 @@ export default function HomePage() {
             行（南北）
             <input
               type="number"
-              size={3}
               value={req.rows}
               onChange={(e) => setReq({ ...req, rows: Number(e.target.value) || 2 })}
             />
@@ -121,7 +120,6 @@ export default function HomePage() {
             列（東西）
             <input
               type="number"
-              size={3}
               value={req.cols}
               onChange={(e) => setReq({ ...req, cols: Number(e.target.value) || 2 })}
             />
@@ -129,7 +127,6 @@ export default function HomePage() {
           <label>
             seed
             <input
-              size={4}
               value={req.seed ?? ""}
               onChange={(e) => setReq({ ...req, seed: e.target.value === "" ? null : Number(e.target.value) })}
             />
@@ -138,7 +135,6 @@ export default function HomePage() {
             最大改善周回
             <input
               type="number"
-              size={4}
               value={req.max_passes}
               onChange={(e) => setReq({ ...req, max_passes: Math.max(1, Number(e.target.value) || 80) })}
             />
@@ -147,7 +143,6 @@ export default function HomePage() {
             提案数
             <input
               type="number"
-              size={2}
               value={req.n_proposals}
               onChange={(e) => setReq({ ...req, n_proposals: Math.min(8, Math.max(1, Number(e.target.value) || 3)) })}
             />
@@ -156,7 +151,6 @@ export default function HomePage() {
             制限時間（秒）
             <input
               type="number"
-              size={3}
               min={1}
               max={120}
               value={Math.round((req.time_limit_ms ?? 45000) / 1000)}

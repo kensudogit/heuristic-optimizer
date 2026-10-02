@@ -75,8 +75,8 @@ const TIPS: { title: string; body: string }[] = [
     body: "見出しに「厳密最適」と出たときだけ証明済みです。案1が整列していても、厳密チェックがオフなら近似解です。",
   },
   {
-    title: "ポートが使えない・cmd から起動できない",
-    body: "コマンドプロンプトからは start.cmd を使います。.ps1 を直接叩いても動きません。3010 / 8010 が埋まっているときは FRONTEND_PORT / BACKEND_PORT を付けて docker compose を起動します。",
+    title: "ポートが使えない・cmd から起動できない・Railway が失敗する",
+    body: "コマンドプロンプトからは start.cmd を使います。.ps1 を直接叩いても動きません。3010 / 8010 が埋まっているときは FRONTEND_PORT / BACKEND_PORT を付けて docker compose を起動します。Railway はリポジトリ直下を Railpack で判定できないので、ルートの Dockerfile（railway.toml）でデプロイします。",
   },
   {
     title: "探索が長い・失敗する",

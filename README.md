@@ -47,7 +47,19 @@ docker compose up --build
 バックグラウンド起動は `docker compose up --build -d`、停止は `docker compose down` です。
 ポートを変えるときは `BACKEND_PORT` / `FRONTEND_PORT` を付けます。
 
-コマンドプロンプトなら `start.cmd`、PowerShell なら `.\start.ps1` で同じ Compose を起動できます。
+コマンドプロンプトなら `start.cmd`、PowerShell なら `.\start.ps1`、Linux / Railway なら `./start.sh` です。
+
+## Railway
+
+リポジトリ直下は backend と frontend が並んでいるため、Railpack は言語を判定できません。
+ルートの `railway.toml` と `Dockerfile` で、API と画面を1サービスにまとめています。
+
+1. GitHub リポジトリから Deploy する
+2. ビルダは Dockerfile（`railway.toml` で指定済み）
+3. 公開 URL が画面。API は同じオリジンの `/api`
+
+2サービスに分ける場合は、backend / frontend それぞれで Root Directory を設定します。
+frontend の `API_INTERNAL_URL` には backend の内部 URL を入れてください。
 
 ## 起動（ローカル）
 
