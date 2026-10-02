@@ -94,9 +94,13 @@ select {
   display: flex;
   flex-wrap: wrap;
   align-items: flex-end;
-  gap: 12px 14px;
+  gap: 12px 16px;
 }
-.controls > label:not(.exact-toggle) { width: 6.75rem; }
+.controls > label:not(.exact-toggle) { width: max-content; }
+.controls input {
+  width: 64px;
+  min-width: 64px;
+}
 label { display: flex; flex-direction: column; gap: 6px; font-size: 0.82rem; color: var(--g-text-sub); font-weight: 600; }
 input, button {
   padding: 10px;
@@ -105,7 +109,6 @@ input, button {
   font: inherit;
   color: var(--g-text);
 }
-.controls input { width: 100%; }
 input:focus, select:focus {
   outline: 2px solid #cfc6f8;
   outline-offset: 1px;
