@@ -187,8 +187,8 @@ export default function HomePage() {
         </div>
         {req.departments.map((d, i) => (
           <div className="row dept" key={d.id}>
-            <input value={d.id} onChange={(e) => updateDept(i, { id: e.target.value })} aria-label={`工程ID-${i}`} />
-            <input value={d.name} onChange={(e) => updateDept(i, { name: e.target.value })} aria-label={`工程名-${i}`} />
+            <input size={8} value={d.id} onChange={(e) => updateDept(i, { id: e.target.value })} aria-label={`工程ID-${i}`} />
+            <input size={12} value={d.name} onChange={(e) => updateDept(i, { name: e.target.value })} aria-label={`工程名-${i}`} />
             <select
               value={d.role}
               onChange={(e) => updateDept(i, { role: e.target.value as Department["role"] })}
@@ -201,12 +201,14 @@ export default function HomePage() {
             </select>
             <input
               type="number"
+              size={3}
               value={d.width}
               onChange={(e) => updateDept(i, { width: Number(e.target.value) || 1 })}
               aria-label={`幅-${i}`}
             />
             <input
               type="number"
+              size={3}
               value={d.height}
               onChange={(e) => updateDept(i, { height: Number(e.target.value) || 1 })}
               aria-label={`高さ-${i}`}
@@ -224,10 +226,11 @@ export default function HomePage() {
         </div>
         {req.flows.map((f, i) => (
           <div className="row flow" key={`${f.from_id}-${f.to_id}-${i}`}>
-            <input value={f.from_id} onChange={(e) => updateFlow(i, { from_id: e.target.value })} />
-            <input value={f.to_id} onChange={(e) => updateFlow(i, { to_id: e.target.value })} />
+            <input size={8} value={f.from_id} onChange={(e) => updateFlow(i, { from_id: e.target.value })} />
+            <input size={8} value={f.to_id} onChange={(e) => updateFlow(i, { to_id: e.target.value })} />
             <input
               type="number"
+              size={4}
               value={f.volume}
               onChange={(e) => updateFlow(i, { volume: Number(e.target.value) || 0 })}
             />

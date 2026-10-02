@@ -64,8 +64,8 @@ section h2 {
   width: max-content;
   max-width: 100%;
 }
-.row.dept { grid-template-columns: 6.75rem minmax(11rem, 16rem) 5.25rem 4.25rem 4.25rem; }
-.row.flow { grid-template-columns: 6.75rem 6.75rem 5rem; }
+.row.dept { grid-template-columns: 88px 152px 84px 64px 64px; }
+.row.flow { grid-template-columns: 88px 88px 72px; }
 .row.head {
   margin: 0 0 4px;
   font-size: 0.75rem;
@@ -73,7 +73,15 @@ section h2 {
   color: var(--g-text-sub);
 }
 .row.head span { padding: 0 2px; }
-.row input, .row select { width: 100%; min-width: 0; }
+.row input, .row select {
+  width: 100%;
+  min-width: 0;
+  max-width: 100%;
+}
+.row input[type="number"] {
+  padding-left: 8px;
+  padding-right: 6px;
+}
 select {
   padding: 10px;
   border: 1px solid var(--g-accent-line);
@@ -88,7 +96,7 @@ select {
   align-items: flex-end;
   gap: 12px 14px;
 }
-.controls > label:not(.exact-toggle) { width: 7rem; }
+.controls > label:not(.exact-toggle) { width: 6.75rem; }
 label { display: flex; flex-direction: column; gap: 6px; font-size: 0.82rem; color: var(--g-text-sub); font-weight: 600; }
 input, button {
   padding: 10px;
