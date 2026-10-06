@@ -1,5 +1,9 @@
 # 工場建設レイアウト最適化 PoC
 
+> **Optimization / Operations Research** — 貪欲探索・局所改善・Simulated Annealing・分枝限定を使った工場レイアウト最適化PoCです。
+>
+> **Stack:** Python 3.12 · FastAPI · Next.js · React · TypeScript
+
 建設時の工場レイアウト（施設配置）を、ヒューリスティックで探索する PoC です。
 Python 3.12 + FastAPI と Next.js / React / TypeScript で動きます。
 
